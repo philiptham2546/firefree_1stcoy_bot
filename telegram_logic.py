@@ -337,7 +337,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/wbgt_cat_haze — current WBGT, CAT, and PSI (haze)\n"
         "/set_wbgt_camp — set WBGT camp (e.g. Sungei Gedong Camp)\n"
         "/set_cat_sector — set CAT sector (e.g. 3N)\n\n"
-        "Here is the current date, camp, and sector configuration:"
+        "Here is the current date, camp, and sector configuration:\n"
         f"Current date set: {on.strftime('%d %b %Y')}\n"
         f"Current WBGT camp: {camp}\n"
         f"Current CAT sector: {sector}"
