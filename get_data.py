@@ -43,7 +43,7 @@ def is_active(cell, on: date) -> bool:
 
 
 def load_sheet(ws_name="HR"):
-    SHEET_NAME = "0. 10th Gen 1st Coy Tracking caa 280726"
+    SHEET_KEY = "1ZpPqkYcje4nB335yzqauN55nbjX_oO3TtLGGcnk0hcw"
 
     scopes = [
         "https://www.googleapis.com/auth/spreadsheets",
@@ -51,7 +51,7 @@ def load_sheet(ws_name="HR"):
     ]
     creds = Credentials.from_service_account_file("credentials.json", scopes=scopes)
     client = gspread.authorize(creds)
-    sh = client.open(SHEET_NAME)
+    sh = client.open_by_key(SHEET_KEY)
     temp = [ws.title for ws in list(sh.worksheets())]
     if ws_name not in temp:
         return False, f"NO WS FOUND. WS TITLES ARE {temp}"

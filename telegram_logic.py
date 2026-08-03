@@ -166,7 +166,7 @@ Notes:
 
 Begin with:
 
-📅 1 Coy Daily Summary (<today's date>)
+📅 1st Coy Daily Summary (<today's date>) (MUST be 1st Coy, not 1 Coy)
 
 Then output the following sections in this order.
 
