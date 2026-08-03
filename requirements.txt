@@ -1,4 +1,4 @@
-python-telegram-bot==22.8
+python-telegram-bot[webhooks]==22.8
 openai==2.52.0
 python-dotenv==1.2.2
 timetree-exporter==0.8.0
