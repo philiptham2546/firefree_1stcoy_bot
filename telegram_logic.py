@@ -328,16 +328,17 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     camp = get_wbgt_camp(context)
     sector = get_cat_sector(context)
     await update.message.reply_text(
-        "Hello, thanks for chatting with the Fire Free 1st Coy bot!\n"
-        "Commands:\n"
+        "Hello, thanks for chatting with the Fire Free 1st Coy bot!\n\n"
+        "Here are the commands you can use:\n"
         "/summarise — Summary of things going on on a particular date (pulled from TimeTree calendars and HR sheets) (can use set_date to set a date that is NOT today)\n"
         "/set_date — set the summary date (DDMMYY)\n"
         "/check_date — show the current summary date\n"
         "/check_parade_state — check a pasted parade state against HR/Timetree\n"
         "/wbgt_cat_haze — current WBGT, CAT, and PSI (haze)\n"
         "/set_wbgt_camp — set WBGT camp (e.g. Sungei Gedong Camp)\n"
-        "/set_cat_sector — set CAT sector (e.g. 3N)\n"
-        f"Current summary date: {on.strftime('%d %b %Y')}\n"
+        "/set_cat_sector — set CAT sector (e.g. 3N)\n\n"
+        "Here is the current date, camp, and sector configuration:"
+        f"Current date set: {on.strftime('%d %b %Y')}\n"
         f"Current WBGT camp: {camp}\n"
         f"Current CAT sector: {sector}"
     )
