@@ -3,6 +3,7 @@ import os
 import re
 import time
 from get_data import parse_ddmmyy, status_monitoring, timetree_monitoring
+from wbgt import get_info
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -15,7 +16,7 @@ from telegram.ext import (
 )
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
-from datetime import date
+from datetime import date, datetime
 
 load_dotenv()
 
@@ -245,17 +246,79 @@ async def generate_parade_check_response(
     return resp.output_text
 
 
+def format_wbgt_cat_haze(info: dict) -> str:
+    """Turn get_info() output into a short human-readable Telegram message."""
+    lines = ["🌡 WBGT / CAT / Haze"]
+
+    wbgt = info.get("wbgt")
+    lines.append("")
+    lines.append("WBGT")
+    if not wbgt:
+        lines.append("• No data available")
+    else:
+        lines.append(f"• Camp: {wbgt.get('camp') or '—'}")
+        wbgt_val = wbgt.get("wbgt")
+        lines.append(
+            f"• Reading: {wbgt_val}℃" if wbgt_val is not None else "• Reading: —"
+        )
+        lines.append(f"• Category: {wbgt.get('category') or '—'}")
+        lines.append(f"• Updated: {wbgt.get('updated_at') or '—'} hrs")
+
+    cat = info.get("cat") or {}
+    lines.append("")
+    lines.append("CAT")
+    lines.append(f"• Sector: {cat.get('sector') or '—'}")
+    lines.append(f"• Status: {cat.get('status') or '—'}")
+    if cat.get("start") and cat.get("end"):
+        lines.append(f"• Window: {cat['start']}–{cat['end']} hrs")
+    else:
+        lines.append("• Window: —")
+
+    psi = info.get("psi")
+    lines.append("")
+    lines.append("Haze (PSI)")
+    if not psi or len(psi) < 3:
+        lines.append("• No data available")
+    else:
+        region, timestamp, value = psi
+        # e.g. 2026-08-03T17:00:00+08:00 → 03 Aug 2026 17:00
+        display_time = timestamp
+        try:
+            display_time = datetime.fromisoformat(timestamp).strftime("%d %b %Y %H:%M")
+        except (TypeError, ValueError):
+            pass
+        lines.append(f"• Region: {region}")
+        lines.append(f"• 24h PSI: {value}")
+        lines.append(f"• Updated: {display_time}")
+    lines.append(
+        "\nHaze data pulled from NEA API. WBGT and Cat statuses pulled from Telegram channels."
+    )
+
+    return "\n".join(lines)
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     on = get_summary_date(context)
     await update.message.reply_text(
         "Hello, thanks for chatting with the Fire Free 1st Coy bot!\n"
         "Commands:\n"
-        "/summarise — generate today's summary\n"
+        "/summarise — Summary of things going on on a particular date (pulled from TimeTree calendars and HR sheets) (can use set_date to set a date that is NOT today)\n"
         "/set_date — set the summary date (DDMMYY)\n"
         "/check_date — show the current summary date\n"
         "/check_parade_state — check a pasted parade state against HR/Timetree\n"
+        "/wbgt_cat_haze — current WBGT, CAT, and PSI (haze)\n"
         f"Current summary date: {on.strftime('%d %b %Y')}"
     )
+
+
+async def wbgt_cat_haze_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Fetching WBGT, CAT, and PSI…")
+    try:
+        info = get_info()
+    except Exception as exc:
+        await update.message.reply_text(f"Failed to fetch data: {exc}")
+        return
+    await update.message.reply_text(format_wbgt_cat_haze(info))
 
 
 async def summarise_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -463,6 +526,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("summarise", summarise_command))
     app.add_handler(CommandHandler("check_date", check_date_command))
+    app.add_handler(CommandHandler("wbgt_cat_haze", wbgt_cat_haze_command))
     app.add_handler(set_date_conv)
     app.add_handler(check_parade_conv)
 
