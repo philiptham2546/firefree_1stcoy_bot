@@ -269,7 +269,8 @@ def format_wbgt_cat_haze(info: dict) -> str:
     lines = [
         "1st Company Safety Updates",
         f"CAA {date_str} {time_str}",
-        "🚐 Safety team location: - (edit if nec)",
+        "",
+        "🚐 Safety team location: (edit if nec)",
         "",
         "🧊 EMCOOL: DD TTTThrs (edit if nec)",
         "",
