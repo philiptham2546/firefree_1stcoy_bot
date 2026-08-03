@@ -3,6 +3,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import json
+import re
 
 CHANNELS = {"wbgt": "https://t.me/s/armynaws", "cat": "https://t.me/s/ArmyCAT1_v2"}
 
@@ -58,12 +59,6 @@ def extract_wbgt(text: str, camp: str = "Sungei Gedong Camp") -> dict | None:
         "category": headings[-1] if headings else None,
         "updated_at": update_time,
     }
-
-
-import re
-
-
-import re
 
 
 def get_cat_status(message: str, target_sector: str = "3N") -> dict:
@@ -122,11 +117,15 @@ def get_psi_north():
     return "North", time, psi
 
 
-def get_info():
+def get_info(camp: str = "Sungei Gedong Camp", sector: str = "3N"):
     info = {}
     for k, v in CHANNELS.items():
         temp = get_latest_message(v)
-        info[k] = extract_wbgt(temp) if k == "wbgt" else get_cat_status(temp)
+        info[k] = (
+            extract_wbgt(temp, camp=camp)
+            if k == "wbgt"
+            else get_cat_status(temp, target_sector=sector)
+        )
     info["psi"] = get_psi_north()
     return info
 
