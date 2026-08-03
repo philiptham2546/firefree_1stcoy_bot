@@ -20,6 +20,7 @@ from datetime import date, datetime
 import tornado.web
 import telegram.ext._updater as updater_mod
 from telegram.ext._utils.webhookhandler import WebhookAppClass
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 
@@ -263,7 +264,7 @@ async def generate_parade_check_response(
 
 def format_wbgt_cat_haze(info: dict) -> str:
     """Turn get_info() output into a short human-readable Telegram message."""
-    now = datetime.now()
+    now = datetime.now(ZoneInfo("Asia/Singapore"))
     date_str = now.strftime("%d%m%y")  # DDMMYY
     time_str = now.strftime("%H%Mhrs")  # HHMMhrs
     lines = [
