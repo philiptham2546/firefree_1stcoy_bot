@@ -302,22 +302,41 @@ def format_wbgt_cat_haze(info: dict) -> str:
     else:
         lines.append("• Window: —")
 
-    psi = info.get("psi")
+    haze = info.get("haze") or {}
     lines.append("")
-    lines.append("Haze (PSI)")
-    if not psi or len(psi) < 3:
+
+    def _fmt_haze_time(ts):
+        # e.g. 2026-08-03T17:00:00+08:00 → 03 Aug 2026 17:00
+        try:
+            return datetime.fromisoformat(ts).strftime("%d %b %Y %H:%M")
+        except (TypeError, ValueError):
+            return ts or "—"
+
+    if not haze:
+        lines.append("PSI 24-Hourly (Haze): —")
+        lines.append("• No data available")
+        lines.append("")
+        lines.append("PM 24-Hourly (Haze): —")
         lines.append("• No data available")
     else:
-        region, timestamp, value = psi
-        # e.g. 2026-08-03T17:00:00+08:00 → 03 Aug 2026 17:00
-        display_time = timestamp
-        try:
-            display_time = datetime.fromisoformat(timestamp).strftime("%d %b %Y %H:%M")
-        except (TypeError, ValueError):
-            pass
-        lines.append(f"• Region: {region}")
-        lines.append(f"• 24h PSI: {value}")
-        lines.append(f"• Updated: {display_time}")
+        loc = haze.get("loc") or "—"
+        psi_time = _fmt_haze_time(haze.get("psi_time"))
+        pm_time = _fmt_haze_time(haze.get("pm_time"))
+
+        lines.append(
+            f"PSI 24-Hourly (Haze): {haze.get('psi_24', '—')} "
+            f"({haze.get('psi_rating') or '—'}) ({loc}, {psi_time})"
+        )
+        lines.append(f"• General population: {haze.get('psi_adv_gen_pop') or '—'}")
+        lines.append(f"• Susceptible population: {haze.get('psi_adv_sus_pop') or '—'}")
+        lines.append("")
+        lines.append(
+            f"PM 24-Hourly (Haze): {haze.get('pm_25', '—')} "
+            f"({haze.get('pm_rating') or '—'}) ({loc}, {pm_time})"
+        )
+        lines.append(f"• General population: {haze.get('pm_adv_gen_pop') or '—'}")
+        lines.append(f"• Susceptible population: {haze.get('pm_adv_sus_pop') or '—'}")
+
     lines.append(
         "\nHaze data pulled from NEA API. WBGT and Cat statuses pulled from Telegram channels."
     )

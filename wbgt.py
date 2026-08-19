@@ -109,12 +109,91 @@ def get_cat_status(message: str, target_sector: str = "3N") -> dict:
 
 
 # FOR PSI
-def get_psi_north():
+def get_psi_west():
     resp = requests.get("https://api-open.data.gov.sg/v2/real-time/api/psi")
     resp_clean = json.loads(resp.text)
-    psi = resp_clean["data"]["items"][0]["readings"]["psi_twenty_four_hourly"]["north"]
-    time = resp_clean["data"]["items"][0]["timestamp"]
-    return "North", time, psi
+    psi_24 = resp_clean["data"]["items"][0]["readings"]["psi_twenty_four_hourly"][
+        "west"
+    ]
+    psi_time = resp_clean["data"]["items"][0]["timestamp"]
+    pm_resp = requests.get("https://api-open.data.gov.sg/v2/real-time/api/pm25")
+    pm_resp_clean = json.loads(pm_resp.text)
+    pm_25 = pm_resp_clean["data"]["items"][0]["readings"]["pm25_one_hourly"]["west"]
+    pm_time = resp_clean["data"]["items"][0]["timestamp"]
+
+    return "West", psi_time, psi_24, pm_time, pm_25
+
+
+def get_all_psi():
+    loc, psi_time, psi_24, pm_time, pm_25 = get_psi_west()
+    psi_24, pm_25 = int(psi_24), int(pm_25)
+    info = {}
+    # psi 24 guidelines
+    if psi_24 <= 100:
+        info["psi_rating"] = "Good/Moderate"
+        info["psi_adv_gen_pop"] = "Normal activities"
+        info["psi_adv_sus_pop"] = "Normal activities"
+    elif 101 <= psi_24 <= 200:
+        info["psi_rating"] = "Unhealthy"
+        info["psi_adv_gen_pop"] = (
+            "REDUCE prolonged (>=3h duration) or strenuous (>= 6.0 Metabloic Equivalent Tasks) outdoor physical activities"
+        )
+        info["psi_adv_sus_pop"] = (
+            "AVOID prolonged (>=3h duration) or strenuous (>= 6.0 Metabloic Equivalent Tasks) outdoor physical activities"
+        )
+    elif 201 <= psi_24 <= 300:
+        info["psi_rating"] = "Very Unhealthy"
+        info["psi_adv_gen_pop"] = (
+            "AVOID prolonged (>=3h duration) or strenuous (>= 6.0 Metabloic Equivalent Tasks) outdoor physical activities"
+        )
+        info["psi_adv_sus_pop"] = "AVOID non-essential outdoor activities"
+    else:
+        info["psi_rating"] = "Hazardous"
+        info["psi_adv_gen_pop"] = "MINIMISE outdoor activities"
+        info["psi_adv_sus_pop"] = "AVOID non-essential outdoor activities"
+
+    # pm 25 guidelines
+    if pm_25 <= 55:
+        info["pm_rating"] = "Normal"
+        info["pm_adv_gen_pop"] = "Normal activities"
+        info["pm_adv_sus_pop"] = "Normal activities"
+    elif 56 <= pm_25 <= 150:
+        info["pm_rating"] = "Elevated"
+        info["pm_adv_gen_pop"] = (
+            "REDUCE strenuous (>= 6.0 Metabloic Equivalent Tasks) outdoor activities for the next hour"
+        )
+        info["pm_adv_sus_pop"] = (
+            "AVOID strenuous (>= 6.0 Metabloic Equivalent Tasks) outdoor activities for the next hour"
+        )
+    elif 151 <= pm_25 <= 250:
+        info["pm_rating"] = "High"
+        info["pm_adv_gen_pop"] = (
+            "AVOID strenuous (>= 6.0 Metabloic Equivalent Tasks) outdoor activities for the next hour"
+        )
+        info["pm_adv_sus_pop"] = (
+            "AVOID all outdoor activities for the next hour; Don PPE (N95) when performing essential outdoor duties"
+        )
+    else:
+        info["pm_rating"] = "Very High"
+        info["pm_adv_gen_pop"] = (
+            "MINIMISE all outdoor activities for the next hour; Don PPE (N95) when performing essential outdoor duties"
+        )
+        info["pm_adv_sus_pop"] = (
+            "AVOID all outdoor activities for the next hour; Don PPE (N95) when performing essential outdoor duties"
+        )
+    return {
+        "loc": loc,
+        "psi_time": psi_time,
+        "psi_24": psi_24,
+        "psi_rating": info["psi_rating"],
+        "psi_adv_gen_pop": info["psi_adv_gen_pop"],
+        "psi_adv_sus_pop": info["psi_adv_sus_pop"],
+        "pm_time": pm_time,
+        "pm_25": pm_25,
+        "pm_rating": info["pm_rating"],
+        "pm_adv_gen_pop": info["pm_adv_gen_pop"],
+        "pm_adv_sus_pop": info["pm_adv_sus_pop"],
+    }
 
 
 def get_info(camp: str = "Sungei Gedong Camp", sector: str = "3N"):
@@ -126,7 +205,7 @@ def get_info(camp: str = "Sungei Gedong Camp", sector: str = "3N"):
             if k == "wbgt"
             else get_cat_status(temp, target_sector=sector)
         )
-    info["psi"] = get_psi_north()
+    info["haze"] = get_all_psi()
     return info
 
 
