@@ -316,7 +316,7 @@ def format_wbgt_cat_haze(info: dict) -> str:
         lines.append("PSI 24-Hourly (Haze): —")
         lines.append("• No data available")
         lines.append("")
-        lines.append("PM 24-Hourly (Haze): —")
+        lines.append("PM 2.5 1-Hourly (Haze): —")
         lines.append("• No data available")
     else:
         loc = haze.get("loc") or "—"
@@ -331,7 +331,7 @@ def format_wbgt_cat_haze(info: dict) -> str:
         lines.append(f"• Susceptible population: {haze.get('psi_adv_sus_pop') or '—'}")
         lines.append("")
         lines.append(
-            f"PM 24-Hourly (Haze): {haze.get('pm_25', '—')} "
+            f"PM 2.5 1-Hourly (Haze): {haze.get('pm_25', '—')} "
             f"({haze.get('pm_rating') or '—'}) ({loc}, {pm_time})"
         )
         lines.append(f"• General population: {haze.get('pm_adv_gen_pop') or '—'}")
