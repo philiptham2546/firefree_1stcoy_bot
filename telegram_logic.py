@@ -289,7 +289,21 @@ def format_wbgt_cat_haze(info: dict) -> str:
         lines.append(
             f"• Reading: {wbgt_val}℃" if wbgt_val is not None else "• Reading: —"
         )
+        category = (wbgt.get("category") or "").upper()
         lines.append(f"• Category: {wbgt.get('category') or '—'}")
+        if category == "WHITE":
+            adv_ratio = "60:15"
+        elif category == "GREEN":
+            adv_ratio = "45:15"
+        elif category == "YELLOW":
+            adv_ratio = "30:15"
+        elif category == "RED":
+            adv_ratio = "30:30"
+        elif category == "BLACK":
+            adv_ratio = "15:30"
+        else:
+            adv_ratio = "Cut-Off: No strenuous training"
+        lines.append(f"• Work : Rest (minutes): {adv_ratio}")
         lines.append(f"• Updated: {wbgt.get('updated_at') or '—'} hrs")
 
     cat = info.get("cat") or {}
