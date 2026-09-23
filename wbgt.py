@@ -196,15 +196,23 @@ def get_all_psi():
     }
 
 
-def get_info(camp: str = "Sungei Gedong Camp", sector: str = "3N"):
+def get_info(
+    camp=[
+        "Sungei Gedong Camp",
+        "D1/E/TP F (N)/TP F (S)/TP 8 - Area E",
+        "TP 2N/SAFTI City",
+    ],
+    sector: str = "3N",
+):
     info = {}
     for k, v in CHANNELS.items():
         temp = get_latest_message(v)
         info[k] = (
-            extract_wbgt(temp, camp=camp)
+            [extract_wbgt(temp, camp=camp_i) for camp_i in camp]
             if k == "wbgt"
             else get_cat_status(temp, target_sector=sector)
         )
+
     info["haze"] = get_all_psi()
     return info
 
