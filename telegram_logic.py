@@ -68,6 +68,15 @@ def get_wbgt_camps(context: ContextTypes.DEFAULT_TYPE) -> list[str]:
     return list(camps)
 
 
+def add_wbgt_camp(context: ContextTypes.DEFAULT_TYPE, camp: str) -> list[str]:
+    """Add a camp to the existing list without wiping other camps."""
+    camps = get_wbgt_camps(context)
+    if camp not in camps:
+        camps.append(camp)
+    context.user_data["wbgt_camp"] = camps
+    return camps
+
+
 def get_cat_sector(context: ContextTypes.DEFAULT_TYPE) -> str:
     return context.user_data.get("cat_sector", DEFAULT_CAT_SECTOR)
 
@@ -482,14 +491,17 @@ async def set_wbgt_camp_command(update: Update, context: ContextTypes.DEFAULT_TY
                 "Invalid camp. Example: /set_wbgt_camp Selarang Camp"
             )
             return ConversationHandler.END
-        context.user_data["wbgt_camp"] = camp
-        await update.message.reply_text(f"WBGT camp set to {camp}")
+        camps = add_wbgt_camp(context, camp)
+        await update.message.reply_text(
+            f"Added WBGT camp: {camp}\n"
+            f"Current WBGT camp(s): {', '.join(camps)}"
+        )
         return ConversationHandler.END
 
     current = get_wbgt_camps(context)
     await update.message.reply_text(
         f"Current WBGT camp(s): {', '.join(current)}\n"
-        "Enter the camp name (e.g. Selarang Camp), or /cancel:"
+        "Enter a camp name to add (e.g. Selarang Camp), or /cancel:"
     )
     return ASK_WBGT_CAMP
 
@@ -499,8 +511,11 @@ async def receive_wbgt_camp(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not camp:
         await update.message.reply_text("Camp name was empty. Try again, or /cancel.")
         return ASK_WBGT_CAMP
-    context.user_data["wbgt_camp"] = camp
-    await update.message.reply_text(f"WBGT camp set to {camp}")
+    camps = add_wbgt_camp(context, camp)
+    await update.message.reply_text(
+        f"Added WBGT camp: {camp}\n"
+        f"Current WBGT camp(s): {', '.join(camps)}"
+    )
     return ConversationHandler.END
 
 
