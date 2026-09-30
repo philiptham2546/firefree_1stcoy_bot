@@ -36,6 +36,7 @@ DEFAULT_WBGT_CAMPS = [
     "Selarang Camp",
     "D1/E/TP F (N)/TP F (S)/TP 8 - Area E",
     "TP 2N/SAFTI City",
+    "TP 9",
 ]
 DEFAULT_CAT_SECTOR = "3N"
 PARADE_CHECK_DISCLAIMER = (

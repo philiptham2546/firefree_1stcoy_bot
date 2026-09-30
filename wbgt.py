@@ -201,6 +201,7 @@ def get_info(
         "Selarang Camp",
         "D1/E/TP F (N)/TP F (S)/TP 8 - Area E",
         "TP 2N/SAFTI City",
+        "TP 9",
     ],
     sector: str = "3N",
 ):
