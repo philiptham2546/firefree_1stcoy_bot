@@ -36,7 +36,7 @@ DEFAULT_WBGT_CAMPS = [
     "Selarang Camp",
     "D1/E/TP F (N)/TP F (S)/TP 8 - Area E",
     "TP 2N/SAFTI City",
-    "TP 9",
+    "TP 9 - Sector A/Zone 1",
 ]
 DEFAULT_CAT_SECTOR = "3N"
 PARADE_CHECK_DISCLAIMER = (
@@ -493,8 +493,7 @@ async def set_wbgt_camp_command(update: Update, context: ContextTypes.DEFAULT_TY
             return ConversationHandler.END
         camps = add_wbgt_camp(context, camp)
         await update.message.reply_text(
-            f"Added WBGT camp: {camp}\n"
-            f"Current WBGT camp(s): {', '.join(camps)}"
+            f"Added WBGT camp: {camp}\nCurrent WBGT camp(s): {', '.join(camps)}"
         )
         return ConversationHandler.END
 
@@ -513,8 +512,7 @@ async def receive_wbgt_camp(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ASK_WBGT_CAMP
     camps = add_wbgt_camp(context, camp)
     await update.message.reply_text(
-        f"Added WBGT camp: {camp}\n"
-        f"Current WBGT camp(s): {', '.join(camps)}"
+        f"Added WBGT camp: {camp}\nCurrent WBGT camp(s): {', '.join(camps)}"
     )
     return ConversationHandler.END
 
