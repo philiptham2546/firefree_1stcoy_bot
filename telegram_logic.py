@@ -33,7 +33,7 @@ ASK_PARADE_STATE = 2
 ASK_WBGT_CAMP = 3
 ASK_CAT_SECTOR = 4
 DEFAULT_WBGT_CAMPS = [
-    "Sungei Gedong Camp",
+    "Selarang Camp",
     "D1/E/TP F (N)/TP F (S)/TP 8 - Area E",
     "TP 2N/SAFTI City",
 ]
@@ -386,7 +386,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/check_date — show the current summary date\n"
         "/check_parade_state — check a pasted parade state against HR/Timetree\n"
         "/wbgt_cat_haze — current WBGT, CAT, and PSI (haze)\n"
-        "/set_wbgt_camp — set WBGT camp (e.g. Sungei Gedong Camp)\n"
+        "/set_wbgt_camp — set WBGT camp (e.g. Selarang Camp)\n"
         "/set_cat_sector — set CAT sector (e.g. 3N)\n\n"
         "Here is the current date, camp, and sector configuration:\n"
         f"Current date set: {on.strftime('%d %b %Y')}\n"
@@ -478,7 +478,7 @@ async def set_wbgt_camp_command(update: Update, context: ContextTypes.DEFAULT_TY
         camp = " ".join(context.args).strip()
         if not camp:
             await update.message.reply_text(
-                "Invalid camp. Example: /set_wbgt_camp Sungei Gedong Camp"
+                "Invalid camp. Example: /set_wbgt_camp Selarang Camp"
             )
             return ConversationHandler.END
         context.user_data["wbgt_camp"] = camp
@@ -488,7 +488,7 @@ async def set_wbgt_camp_command(update: Update, context: ContextTypes.DEFAULT_TY
     current = get_wbgt_camps(context)
     await update.message.reply_text(
         f"Current WBGT camp(s): {', '.join(current)}\n"
-        "Enter the camp name (e.g. Sungei Gedong Camp), or /cancel:"
+        "Enter the camp name (e.g. Selarang Camp), or /cancel:"
     )
     return ASK_WBGT_CAMP
 

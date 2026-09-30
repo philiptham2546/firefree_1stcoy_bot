@@ -24,7 +24,7 @@ def get_latest_message(channel):
     return latest_message
 
 
-def extract_wbgt(text: str, camp: str = "Sungei Gedong Camp") -> dict | None:
+def extract_wbgt(text: str, camp: str = "Selarang Camp") -> dict | None:
     # Extract update timestamp
     header_match = re.search(
         r"WBGT Update\s*-\s*(\d{2}\s+[A-Za-z]{3}\s+\d{4}\s+\d{4})hrs",
@@ -198,7 +198,7 @@ def get_all_psi():
 
 def get_info(
     camp=[
-        "Sungei Gedong Camp",
+        "Selarang Camp",
         "D1/E/TP F (N)/TP F (S)/TP 8 - Area E",
         "TP 2N/SAFTI City",
     ],
