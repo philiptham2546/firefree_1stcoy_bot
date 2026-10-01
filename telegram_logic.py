@@ -32,11 +32,11 @@ ASK_DATE = 1
 ASK_PARADE_STATE = 2
 ASK_WBGT_CAMP = 3
 ASK_CAT_SECTOR = 4
+ASK_DELETE_WBGT_CAMP = 5
 DEFAULT_WBGT_CAMPS = [
-    "Selarang Camp",
+    "Sungei Gedong Camp",
     "D1/E/TP F (N)/TP F (S)/TP 8 - Area E",
-    "TP 2N/SAFTI City",
-    "TP 9 - Sector A/Zone 1",
+    "TP 2N/SAFTI City"
 ]
 DEFAULT_CAT_SECTOR = "3N"
 PARADE_CHECK_DISCLAIMER = (
@@ -75,6 +75,15 @@ def add_wbgt_camp(context: ContextTypes.DEFAULT_TYPE, camp: str) -> list[str]:
         camps.append(camp)
     context.user_data["wbgt_camp"] = camps
     return camps
+
+
+def remove_wbgt_camp(context: ContextTypes.DEFAULT_TYPE, camp: str) -> list[str]:
+    """Remove a camp from the list if present; otherwise leave the list unchanged."""
+    camps = get_wbgt_camps(context)
+    if camp in camps:
+        camps.remove(camp)
+        context.user_data["wbgt_camp"] = camps
+    return get_wbgt_camps(context)
 
 
 def get_cat_sector(context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -396,7 +405,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/check_date — show the current summary date\n"
         "/check_parade_state — check a pasted parade state against HR/Timetree\n"
         "/wbgt_cat_haze — current WBGT, CAT, and PSI (haze)\n"
-        "/set_wbgt_camp — set WBGT camp (e.g. Selarang Camp)\n"
+        "/set_wbgt_camp — add a WBGT camp (e.g. Sungei Gedong Camp)\n"
+        "/delete_wbgt_camp — remove a WBGT camp from the list\n"
         "/set_cat_sector — set CAT sector (e.g. 3N)\n\n"
         "Here is the current date, camp, and sector configuration:\n"
         f"Current date set: {on.strftime('%d %b %Y')}\n"
@@ -488,7 +498,7 @@ async def set_wbgt_camp_command(update: Update, context: ContextTypes.DEFAULT_TY
         camp = " ".join(context.args).strip()
         if not camp:
             await update.message.reply_text(
-                "Invalid camp. Example: /set_wbgt_camp Selarang Camp"
+                "Invalid camp. Example: /set_wbgt_camp Sungei Gedong Camp"
             )
             return ConversationHandler.END
         camps = add_wbgt_camp(context, camp)
@@ -500,7 +510,7 @@ async def set_wbgt_camp_command(update: Update, context: ContextTypes.DEFAULT_TY
     current = get_wbgt_camps(context)
     await update.message.reply_text(
         f"Current WBGT camp(s): {', '.join(current)}\n"
-        "Enter a camp name to add (e.g. Selarang Camp), or /cancel:"
+        "Enter a camp name to add (e.g. Sungei Gedong Camp), or /cancel:"
     )
     return ASK_WBGT_CAMP
 
@@ -514,6 +524,56 @@ async def receive_wbgt_camp(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"Added WBGT camp: {camp}\nCurrent WBGT camp(s): {', '.join(camps)}"
     )
+    return ConversationHandler.END
+
+
+async def delete_wbgt_camp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if context.args:
+        camp = " ".join(context.args).strip()
+        if not camp:
+            await update.message.reply_text(
+                "Invalid camp. Example: /delete_wbgt_camp Sungei Gedong Camp"
+            )
+            return ConversationHandler.END
+        before = get_wbgt_camps(context)
+        camps = remove_wbgt_camp(context, camp)
+        if camp in before and camp not in camps:
+            await update.message.reply_text(
+                f"Removed WBGT camp: {camp}\n"
+                f"Current WBGT camp(s): {', '.join(camps) if camps else '(none)'}"
+            )
+        else:
+            await update.message.reply_text(
+                f"Camp not in list: {camp}\n"
+                f"Current WBGT camp(s): {', '.join(camps) if camps else '(none)'}"
+            )
+        return ConversationHandler.END
+
+    current = get_wbgt_camps(context)
+    await update.message.reply_text(
+        f"Current WBGT camp(s): {', '.join(current) if current else '(none)'}\n"
+        "Enter a camp name to remove (exact match), or /cancel:"
+    )
+    return ASK_DELETE_WBGT_CAMP
+
+
+async def receive_delete_wbgt_camp(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    camp = (update.message.text or "").strip()
+    if not camp:
+        await update.message.reply_text("Camp name was empty. Try again, or /cancel.")
+        return ASK_DELETE_WBGT_CAMP
+    before = get_wbgt_camps(context)
+    camps = remove_wbgt_camp(context, camp)
+    if camp in before and camp not in camps:
+        await update.message.reply_text(
+            f"Removed WBGT camp: {camp}\n"
+            f"Current WBGT camp(s): {', '.join(camps) if camps else '(none)'}"
+        )
+    else:
+        await update.message.reply_text(
+            f"Camp not in list: {camp}\n"
+            f"Current WBGT camp(s): {', '.join(camps) if camps else '(none)'}"
+        )
     return ConversationHandler.END
 
 
@@ -712,6 +772,18 @@ if __name__ == "__main__":
         fallbacks=[CommandHandler("cancel", cancel_conversation)],
     )
 
+    delete_wbgt_camp_conv = ConversationHandler(
+        entry_points=[CommandHandler("delete_wbgt_camp", delete_wbgt_camp_command)],
+        states={
+            ASK_DELETE_WBGT_CAMP: [
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND, receive_delete_wbgt_camp
+                )
+            ],
+        },
+        fallbacks=[CommandHandler("cancel", cancel_conversation)],
+    )
+
     set_cat_sector_conv = ConversationHandler(
         entry_points=[CommandHandler("set_cat_sector", set_cat_sector_command)],
         states={
@@ -742,6 +814,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("wbgt_cat_haze", wbgt_cat_haze_command))
     app.add_handler(set_date_conv)
     app.add_handler(set_wbgt_camp_conv)
+    app.add_handler(delete_wbgt_camp_conv)
     app.add_handler(set_cat_sector_conv)
     app.add_handler(check_parade_conv)
 
